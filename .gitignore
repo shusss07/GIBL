@@ -1,0 +1,36 @@
+# Pipeline outputs
+outputs/
+
+# Data directory (large dataset files — place these in data/ locally)
+data/
+DATA_DESCRIPTION_Track_D.md
+ids_labels_eval_HIDDEN.csv
+host_profiles.csv
+ids_alerts.csv
+ids_labels_train.csv
+incident_tickets.csv
+ueba_user_behavior.csv
+netflow_records.csv
+windows_event_logs.csv
+zeek_conn_logs.csv
+
+# Pre-computed large result CSVs (behaviour agent output)
+Behaviour/behavior_agent_detailed_results.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# macOS metadata
+.DS_Store
+
+# Environment files
+.env
+
+# Joblib / model caches (keep Flow/models/*.pkl tracked if desired)
+*.joblib
