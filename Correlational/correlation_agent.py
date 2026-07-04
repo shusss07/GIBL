@@ -111,17 +111,21 @@ def assign_mitre_label(df):
 
     df['predicted_category'] = 'NORMAL'
 
-    # Create a default Series of False with the same index as df
-    default_false = pd.Series(False, index=df.index)
+    # Ensure columns exist to avoid KeyErrors
+    if 'ind_ja3_c2_match' not in df.columns:
+        df['ind_ja3_c2_match'] = 0
+    if 'dst_port' not in df.columns:
+        df['dst_port'] = 0
+    if 'bytes_sent' not in df.columns:
+        df['bytes_sent'] = 0
 
-    # Check each column; if missing, use the default Series of False
-    cond_known_c2 = (df.get('is_known_c2_ja3', default_false) == 1)
-    cond_swift_sql = (df.get('is_swift_sql', default_false) == 1)
-    cond_encrypted_dns = (df.get('is_encrypted_dns', default_false) == 1)
-    cond_swift_internet = (df.get('swift_direct_internet', default_false) == 1)
+    cond_known_c2 = (df['ind_ja3_c2_match'] == 1) | (df['dst_port'] == 853) | (df['dst_port'] == 4444)
+    cond_swift_sql = (df['segment'] == 'SWIFT') & (df['dst_port'] == 1433)
+    cond_data_exfil = (df['bytes_sent'] > 500000) & (df['is_internal_dst'] == False) & (df['threat_score'] >= 0.6)
+    cond_lateral = (df['is_internal_src'] == True) & (df['is_internal_dst'] == True) & (df['threat_score'] >= 0.75)
     cond_critical = df['threat_score'] >= SEVERITY_THRESHOLDS['CRITICAL']
 
-    conditions = [cond_known_c2, cond_swift_sql, cond_encrypted_dns, cond_swift_internet, cond_critical]
+    conditions = [cond_known_c2, cond_swift_sql, cond_data_exfil, cond_lateral, cond_critical]
     categories = ['C2_BEACON', 'SWIFT_TAMPERING', 'DATA_EXFIL', 'LATERAL_MOVEMENT', 'ZERO_DAY']
 
     # Assign categories in reverse order (later conditions override earlier ones)
@@ -263,7 +267,7 @@ def run():
     netflow = pd.read_csv(NETFLOW_CSV, low_memory=False)
     netflow['start_time'] = pd.to_datetime(netflow['start_time'], errors='coerce')
     netflow = netflow[['flow_id', 'src_ip', 'dst_ip', 'start_time', 'segment',
-                       'is_internal_src', 'is_internal_dst']]
+                       'is_internal_src', 'is_internal_dst', 'dst_port', 'bytes_sent']]
     print(f"  {len(netflow):,} flows")
 
     # 2. Load Flow scores (per‑flow)

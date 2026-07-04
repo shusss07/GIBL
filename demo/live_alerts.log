@@ -1,0 +1,4 @@
+{"timestamp": "2026-07-04 10:36:04", "ip": "203.69.143.44", "attack_name": "Data Exfiltration (Small Packets)", "severity": "CRITICAL", "flow_score": 0.95, "behavior_score": 0.32, "packet_score": 0.21, "correlation_score": 0.65}
+{"timestamp": "2026-07-04 10:36:13", "ip": "82.59.195.52", "attack_name": "Data Exfiltration (Small Packets)", "severity": "CRITICAL", "flow_score": 0.95, "behavior_score": 0.38, "packet_score": 0.11, "correlation_score": 0.65}
+{"timestamp": "2026-07-04 10:36:16", "ip": "10.18.3.217", "attack_name": "SWIFT SQL Injection Probe", "severity": "CRITICAL", "flow_score": 0.19, "behavior_score": 0.89, "packet_score": 0.77, "correlation_score": 0.68}
+{"timestamp": "2026-07-04 10:36:21", "ip": "10.43.4.244", "attack_name": "C2 Beacon (Malicious JA3)", "severity": "CRITICAL", "flow_score": 0.29, "behavior_score": 0.24, "packet_score": 0.9, "correlation_score": 0.36}

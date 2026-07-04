@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIBL Cyber Defense Center — Multi-Agent IDS Dashboard</title>
+    <meta name="description" content="Real-time multi-agent correlation intrusion detection system for GIBL core banking.">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #0a0f1d;
+            --bg-surface: #121829;
+            --bg-card: #18223c;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-primary: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --color-critical: #ef4444;
+            --color-high: #f97316;
+            --color-medium: #eab308;
+            --color-benign: #10b981;
+            --font-outfit: 'Outfit', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-inter);
+            overflow-x: hidden;
+            padding-bottom: 2rem;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #121829 0%, #0d1222 100%);
+            border-bottom: 1px solid #1f293d;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand h1 {
+            font-family: var(--font-outfit);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .status-pill {
+            background-color: var(--bg-card);
+            border: 1px solid #1f293d;
+            padding: 0.5rem 0.85rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .indicator.pulse {
+            animation: pulse-green 1.5s infinite;
+        }
+
+        .indicator.pulse-red {
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); background: var(--color-benign); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); background: var(--color-benign); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); background: var(--color-benign); }
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); background: var(--color-critical); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); background: var(--color-critical); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); background: var(--color-critical); }
+        }
+
+        /* Main Grid Layout */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 1.5rem;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Dashboard Cards */
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid #1f293d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-family: var(--font-outfit);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #1f293d;
+            padding-bottom: 0.75rem;
+        }
+
+        /* Buttons Grid */
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.85rem;
+        }
+
+        .btn {
+            background-color: var(--bg-card);
+            border: 1px solid #2e3c5a;
+            color: var(--text-main);
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: left;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background-color: #1f2b4e;
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-benign { border-left: 4px solid var(--color-benign); }
+        .btn-exfil { border-left: 4px solid var(--color-high); }
+        .btn-swift { border-left: 4px solid var(--color-critical); }
+        .btn-c2 { border-left: 4px solid var(--color-critical); }
+
+        .btn-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Live Jail (Blocklist) */
+        .jail-list {
+            max-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .jail-item {
+            background-color: #1a1523;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 0.65rem 0.85rem;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slide-in 0.25s ease-out;
+        }
+
+        .jail-ip {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #fca5a5;
+        }
+
+        .btn-unblock {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 0.2rem;
+            transition: color 0.15s;
+        }
+
+        .btn-unblock:hover {
+            color: var(--color-critical);
+        }
+
+        /* Alerts List */
+        .alerts-stream {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .alert-card {
+            background-color: var(--bg-card);
+            border: 1px solid #1f293d;
+            border-radius: 8px;
+            padding: 1.25rem;
+            position: relative;
+            animation: slide-in 0.3s ease-out;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .alert-card:hover {
+            border-color: #3b82f6;
+        }
+
+        .alert-card.CRITICAL { border-left: 4px solid var(--color-critical); }
+        .alert-card.HIGH { border-left: 4px solid var(--color-high); }
+        .alert-card.MEDIUM { border-left: 4px solid var(--color-medium); }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .alert-title {
+            font-family: var(--font-outfit);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .alert-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Correlation Tree rendering */
+        .correlation-tree {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #2e3c5a;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+
+        .tree-node {
+            background-color: rgba(10, 15, 29, 0.5);
+            border: 1px solid #1f293d;
+            padding: 0.5rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .tree-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .tree-val {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .tree-val.high { color: var(--color-critical); }
+        .tree-val.med { color: var(--color-medium); }
+        .tree-val.low { color: var(--color-benign); }
+
+        /* Netflow Stream console */
+        .netflow-console {
+            background-color: #05070e;
+            border: 1px solid #1f293d;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #38bdf8;
+            height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .log-row {
+            word-break: break-all;
+            white-space: normal;
+            opacity: 0.85;
+        }
+
+        .log-row span.benign { color: var(--color-benign); }
+        .log-row span.blocked { color: var(--color-critical); }
+
+        /* Empty States */
+        .empty-state {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 1.5rem;
+            font-style: italic;
+        }
+
+        @keyframes slide-in {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <h1>GIBL Cyber Defense Center</h1>
+            <p>High-Fidelity Multi-Agent Correlation IDS Engine</p>
+        </div>
+        <div class="status-indicators">
+            <div class="status-pill">
+                <span class="indicator pulse" style="background: var(--color-benign);"></span>
+                Server: Active
+            </div>
+            <div class="status-pill">
+                <span class="indicator pulse" style="background: var(--color-benign);" id="ids-status"></span>
+                IDS Engine: Monitoring
+            </div>
+            <div class="status-pill">
+                Blocklist: <span id="blocklist-count" style="color: var(--color-critical); font-weight: 800;">0</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="card">
+                <h2>⚡ Attack Simulator</h2>
+                <div class="control-grid">
+                    <button class="btn btn-benign" onclick="triggerTraffic('benign')">
+                        Normal Traffic <span class="btn-badge">Benign</span>
+                    </button>
+                    <button class="btn btn-exfil" onclick="triggerTraffic('exfil')">
+                        Data Exfiltration <span class="btn-badge">External</span>
+                    </button>
+                    <button class="btn btn-swift" onclick="triggerTraffic('swift')">
+                        SWIFT SQL Probe <span class="btn-badge">Internal</span>
+                    </button>
+                    <button class="btn btn-c2" onclick="triggerTraffic('c2')">
+                        C2 Beacon <span class="btn-badge">Internal</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🛡️ Firewall Jail</h2>
+                <div class="jail-list" id="blocklist-container">
+                    <div class="empty-state">No IPs currently jailed</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="main-content">
+            <div class="card">
+                <h2>🚨 Live Threat Alerts & Correlation Analysis</h2>
+                <div class="alerts-stream" id="alerts-container">
+                    <div class="empty-state">Waiting for telemetry... Launch simulated traffic above to start.</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💻 Real-Time NetFlow Log Stream</h2>
+                <div class="netflow-console" id="netflow-container">
+                    <!-- Logs append here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let seenFlows = new Set();
+        let seenAlerts = new Set();
+        let currentBlocklist = new Set();
+
+        async function fetchBlocklist() {
+            try {
+                let response = await fetch('/api/blocklist');
+                let blocklist = await response.json();
+                
+                let container = document.getElementById('blocklist-container');
+                let count = document.getElementById('blocklist-count');
+                count.innerText = blocklist.length;
+                
+                let statusInd = document.getElementById('ids-status');
+                if (blocklist.length > 0) {
+                    statusInd.className = "indicator pulse-red";
+                } else {
+                    statusInd.className = "indicator pulse";
+                }
+
+                if (blocklist.length === 0) {
+                    container.innerHTML = `<div class="empty-state">No IPs currently jailed</div>`;
+                    currentBlocklist.clear();
+                    return;
+                }
+
+                // Remove empty state if present
+                if (container.querySelector('.empty-state')) {
+                    container.innerHTML = '';
+                }
+
+                let newBlocklist = new Set(blocklist);
+                
+                // Remove ips no longer in blocklist
+                Array.from(container.children).forEach(child => {
+                    let ipSpan = child.querySelector('.jail-ip');
+                    if (ipSpan && !newBlocklist.has(ipSpan.innerText)) {
+                        child.remove();
+                    }
+                });
+
+                // Add new ips
+                blocklist.forEach(ip => {
+                    if (!currentBlocklist.has(ip)) {
+                        let div = document.createElement('div');
+                        div.className = 'jail-item';
+                        div.innerHTML = `
+                            <span class="jail-ip">${ip}</span>
+                            <button class="btn-unblock" onclick="unblockIp('${ip}')" title="Unblock IP">✕</button>
+                        `;
+                        container.appendChild(div);
+                    }
+                });
+                
+                currentBlocklist = newBlocklist;
+            } catch (e) {
+                console.error("Error fetching blocklist:", e);
+            }
+        }
+
+        async function fetchAlerts() {
+            try {
+                let response = await fetch('/api/alerts');
+                let alerts = await response.json();
+                
+                let container = document.getElementById('alerts-container');
+                if (alerts.length === 0) {
+                    return;
+                }
+
+                if (container.querySelector('.empty-state')) {
+                    container.innerHTML = '';
+                }
+
+                alerts.forEach(alert => {
+                    let alertId = alert.timestamp + '-' + alert.ip + '-' + alert.attack_name;
+                    if (!seenAlerts.has(alertId)) {
+                        seenAlerts.add(alertId);
+                        
+                        let flowClass = alert.flow_score >= 0.7 ? 'high' : (alert.flow_score >= 0.4 ? 'med' : 'low');
+                        let behClass = alert.behavior_score >= 0.7 ? 'high' : (alert.behavior_score >= 0.4 ? 'med' : 'low');
+                        let pktClass = alert.packet_score >= 0.7 ? 'high' : (alert.packet_score >= 0.4 ? 'med' : 'low');
+                        let corrClass = alert.correlation_score >= 0.85 ? 'high' : (alert.correlation_score >= 0.5 ? 'med' : 'low');
+
+                        let div = document.createElement('div');
+                        div.className = `alert-card ${alert.severity}`;
+                        div.innerHTML = `
+                            <div class="alert-header">
+                                <span class="alert-title">${alert.severity} — ${alert.attack_name}</span>
+                                <span class="alert-time">${alert.timestamp}</span>
+                            </div>
+                            <div style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted); margin-bottom: 0.75rem;">
+                                Target Source IP: <span style="color: #fca5a5;">${alert.ip}</span>
+                            </div>
+                            <div class="correlation-tree">
+                                <div class="tree-node">
+                                    <div class="tree-label">Flow Agent</div>
+                                    <div class="tree-val ${flowClass}">${alert.flow_score.toFixed(2)}</div>
+                                </div>
+                                <div class="tree-node">
+                                    <div class="tree-label">Behavior Agent</div>
+                                    <div class="tree-val ${behClass}">${alert.behavior_score.toFixed(2)}</div>
+                                </div>
+                                <div class="tree-node">
+                                    <div class="tree-label">Packet Agent</div>
+                                    <div class="tree-val ${pktClass}">${alert.packet_score.toFixed(2)}</div>
+                                </div>
+                                <div class="tree-node" style="border-color: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);">
+                                    <div class="tree-label" style="color: #60a5fa;">Correlation</div>
+                                    <div class="tree-val ${corrClass}">${alert.correlation_score.toFixed(2)}</div>
+                                </div>
+                            </div>
+                        `;
+                        container.insertBefore(div, container.firstChild);
+                        
+                        if (container.children.length > 50) {
+                            container.removeChild(container.lastChild);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("Error fetching alerts:", e);
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                let response = await fetch('/api/logs');
+                let logs = await response.json();
+                
+                let container = document.getElementById('netflow-container');
+                if (logs.length === 0) {
+                    if (seenFlows.size === 0) {
+                        container.innerHTML = `<div class="empty-state">No network logs yet</div>`;
+                    }
+                    return;
+                }
+
+                if (container.querySelector('.empty-state')) {
+                    container.innerHTML = '';
+                }
+
+                logs.forEach(log => {
+                    if (!seenFlows.has(log.flow_id)) {
+                        seenFlows.add(log.flow_id);
+                        let typeClass = log.sim_packet_score >= 0.7 || log.sim_behavior_score >= 0.8 ? 'blocked' : 'benign';
+                        
+                        let div = document.createElement('div');
+                        div.className = 'log-row';
+                        div.style.animation = 'slide-in 0.3s ease-out';
+                        div.innerHTML = `[${log.start_time}] <span class="${typeClass}">${log.flow_id}</span> | Src: ${log.src_ip} | Dst: ${log.dst_ip} | Port: ${log.dst_port} | Segment: ${log.segment} | Pkts: ${log.packets_sent} | Bytes: ${log.bytes_sent}`;
+                        
+                        container.insertBefore(div, container.firstChild);
+                        
+                        if (container.children.length > 100) {
+                            container.removeChild(container.lastChild);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("Error fetching logs:", e);
+            }
+        }
+
+        async function triggerTraffic(type) {
+            try {
+                await fetch('/api/trigger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type })
+                });
+                
+                // Immediately refresh feeds
+                setTimeout(() => {
+                    fetchLogs();
+                    fetchAlerts();
+                    fetchBlocklist();
+                }, 400);
+            } catch (e) {
+                console.error("Error triggering traffic:", e);
+            }
+        }
+
+        async function unblockIp(ip) {
+            try {
+                await fetch('/api/unblock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip })
+                });
+                fetchBlocklist();
+            } catch (e) {
+                console.error("Error unblocking IP:", e);
+            }
+        }
+
+        // Loop fetching every 500 milliseconds for fluid updates
+        setInterval(() => {
+            fetchBlocklist();
+            fetchAlerts();
+            fetchLogs();
+        }, 500);
+
+        // Initial load
+        fetchBlocklist();
+        fetchAlerts();
+        fetchLogs();
+    </script>
+</body>
+</html>
