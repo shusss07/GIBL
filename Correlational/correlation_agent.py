@@ -50,7 +50,8 @@ def load_score_file(filename, score_col):
             if score_col not in df.columns:
                 print(f"  [WARNING] {p} missing '{score_col}' column. Using default 0.")
                 df[score_col] = 0.0
-            return df[['src_ip', score_col]]
+            df = df[['src_ip', score_col]].groupby('src_ip', as_index=False).max()
+            return df
     print(f"  [WARNING] {filename} not found. Using empty DataFrame (all scores 0).")
     return pd.DataFrame(columns=['src_ip', score_col])
 
@@ -271,8 +272,8 @@ def run():
     df['flow_score'] = df['flow_score'].fillna(0.0)
 
     # 3. Load Packet and Behavior (per‑IP) and map to flows via src_ip
-    packet_ip = load_score_file('packet_scores_by_ip.csv', 'packet_score')
-    behavior_ip = load_score_file('behavior_scores_by_ip.csv', 'behavior_score')
+    packet_ip = load_score_file('threat_results_with_ja3.csv', 'packet_score')
+    behavior_ip = load_score_file('behavior_agent_detailed_results.csv', 'behavior_score')
 
     df = df.merge(packet_ip, on='src_ip', how='left')
     df['packet_score'] = df['packet_score'].fillna(0.0)

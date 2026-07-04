@@ -25,7 +25,7 @@ def load_and_clean(netflow_path, zeek_path=None):
                            usecols=['id_orig_h', 'id_resp_h', 'ja3_hash'])
         zeek = zeek.rename(columns={'id_orig_h': 'src_ip', 'id_resp_h': 'dst_ip'})
         ja3_agg = (zeek.groupby(['src_ip', 'dst_ip'])['ja3_hash']
-                   .agg(lambda x: x.mode()[0] if len(x) > 0 else 'UNKNOWN')
+                   .agg(lambda x: x.mode().iloc[0] if len(x.mode()) > 0 else 'UNKNOWN')
                    .reset_index())
         df = df.merge(ja3_agg, on=['src_ip', 'dst_ip'], how='left')
         df['ja3_hash'] = df['ja3_hash'].fillna('UNKNOWN')

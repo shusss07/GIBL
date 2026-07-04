@@ -42,12 +42,12 @@ PORT_RISK = {
 }
 
 
-NETFLOW_CSV = "netflow_records.csv"
-TRAIN_LABELS_CSV = "ids_labels_train.csv"
-HOSTS_CSV = "host_profiles.csv"
-WINDOWS_LOG = "windows_event_logs.csv"
-ZEEK_LOG = "zeek_conn_logs.csv"  
-OUTPUT_DIR = "output"
+NETFLOW_CSV = "/Users/pratik/Downloads/Track D/netflow_records.csv"
+TRAIN_LABELS_CSV = "/Users/pratik/Downloads/Track D/ids_labels_train.csv"
+HOSTS_CSV = "/Users/pratik/Downloads/Track D/host_profiles.csv"
+WINDOWS_LOG = "/Users/pratik/Downloads/Track D/windows_event_logs.csv"
+ZEEK_LOG = "/Users/pratik/Downloads/Track D/zeek_conn_logs.csv"  
+OUTPUT_DIR = "outputs"
 
 # === Correlation Agent Constants ===
 
@@ -76,7 +76,7 @@ CO_OCCURRENCE_BOOST = 1.30
 COMM018_CHAIN = ['WS-KTM-', 'SRV-DC-01', 'SRV-SQL-01', 'SWIFT-GW-01']
 
 # Directory and file names
-OUTPUT_DIR = "output"
+OUTPUT_DIR = "outputs"
 KILLCHAIN_JSON = "killchain_submission.json"
 
 # Seeded flow IDs (if announced by organizers; otherwise empty)
@@ -98,11 +98,11 @@ CATEGORY_TO_MITRE = {
 }
 
 # If you already have these paths defined, keep them; otherwise add:
-NETFLOW_CSV = "netflow_records.csv"
-HOSTS_CSV = "host_profiles.csv"
-TICKETS_CSV = "incident_tickets.csv"
+NETFLOW_CSV = "/Users/pratik/Downloads/Track D/netflow_records.csv"
+HOSTS_CSV = "/Users/pratik/Downloads/Track D/host_profiles.csv"
+TICKETS_CSV = "/Users/pratik/Downloads/Track D/incident_tickets.csv"
 
 # Score file paths (relative to OUTPUT_DIR)
-FLOW_SCORES_CSV = "output/flow_scores.csv"
-PACKET_SCORES_CSV = "output/packet_scores_by_ip.csv"
-BEHAVIOR_SCORES_CSV = "output/behavior_scores_by_ip.csv"
+FLOW_SCORES_CSV = "flow_scores.csv"
+PACKET_SCORES_CSV = "threat_results_with_ja3.csv"
+BEHAVIOR_SCORES_CSV = "behavior_agent_detailed_results.csv"
